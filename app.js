@@ -5,9 +5,9 @@
 -> - 4 следование импликация
 <-> - 5
 инстина - все 1
-лож все 0
+ложь все 0
 выполнима, 1-1
-не 1-0
+не выполнима 1-0
 */
 var vars = [];
 
@@ -177,34 +177,34 @@ function resultOfExpression(id) {
         stack = {
             value : [],
             top : function() {return this.value[this.value.length - 1]},
-            isEmpty: function() {return ( this.value.length == 0 ? true : false )}
+            isEmpty: function() {return ( this.value.length === 0 )}
         },
         polish = [];
     vars = [];
 
     str.forEach(function(item) {
-        if( "!&|-><->()".indexOf(item) == -1 && vars.indexOf(item) == -1 && "01".indexOf(item) == -1 ) {
+        if( "!&|-><->()".indexOf(item) === -1 && vars.indexOf(item) === -1 && "01".indexOf(item) === -1 ) {
             vars.push(item);
         }
         item = operation(item);
-        if( item == 'LEFT' ) {
+        if( item === 'LEFT' ) {
             stack.value.push(item);
-        } else if( item == 'NOT' ) {
+        } else if( item === 'NOT' ) {
             stack.value.push(item);
-        } else if ( item == 'RIGHT') {
-            while ( stack.top() != 'LEFT' ) {
+        } else if ( item === 'RIGHT') {
+            while ( stack.top() !== 'LEFT' ) {
                 polish.push({value: stack.value.pop(), isOperation: true});
             }
             stack.value.pop();
-        } else if( item == 'AND' || item == 'OR' || item == 'EQ' || item == 'IMP') {
+        } else if( item === 'AND' || item === 'OR' || item === 'EQ' || item === 'IMP') {
             var isOk = true;
             var addToStack = false;
             while (isOk ) {
                 if( !stack.isEmpty() ) {
                     var top = stack.top();
                     var action = table[item][top];
-                    if( action == 1 || action == 2 ) isOk = false;
-                    if( action == 2 || action == 4 ) {
+                    if( action === 1 || action === 2 ) isOk = false;
+                    if( action === 2 || action === 4 ) {
                         polish.push({value: stack.value.pop(), isOperation: true});
                         addToStack = true;
                     }
@@ -232,16 +232,16 @@ function calculateSecondTask(id) {
     $('table:'+id+' tr:not(:first)').each(function (i, item) {
         var value = $(item).find('td:last').text()*1;
         results[value]++;
-        if( value == 0 ) columnZero.push(i);
-        if( value == 1 ) columnOne.push(i);
+        if( value === 0 ) columnZero.push(i);
+        if( value === 1 ) columnOne.push(i);
     });
     calculateSKNFandSDNF(id, columnZero, 0);
     calculateSKNFandSDNF(id, columnOne, 1);
     minimizationSDNF();
     minimizationSKNF();
     var result = 'Функция выполнима и опровержима.';
-    if( columnZero.length == 0 ) result = 'Функция тождественно истинна.';
-    if( columnOne.length == 0 ) result = 'Функция тождественно ложна.';
+    if( columnZero.length === 0 ) result = 'Функция тождественно истинна.';
+    if( columnOne.length === 0 ) result = 'Функция тождественно ложна.';
 
     $('.secondTask input:' + id).val(result);
 }
@@ -257,22 +257,22 @@ function calculateSKNFandSDNF(id, columnZero, value) {
         result += ' (';
         $('table:' + id + ' tr').eq(i+1).find('td:not(:last)').each(function (j, item) {
             var val = $(item).text()*1;
-            var sign = value == 0 ? '|' : '&';
-            result += val != value ? (' !' + vars[j] + ' ' + sign) : (' ' + vars[j] + ' ' + sign);
+            var sign = value === 0 ? '|' : '&';
+            result += val !== value ? (' !' + vars[j] + ' ' + sign) : (' ' + vars[j] + ' ' + sign);
         });
         result = result.substr(0, result.length - 1);
-        result += (') '  + (value == 0 ? '&' : '|') );
+        result += (') '  + (value === 0 ? '&' : '|') );
     });
     result = result.substr(0, result.length - 1);
-    if (result == '') result = '1';
-    if( result == ' ) ') result = 'не определено';
-    $('.thirdTask:' + id).find('.col-md-8:' + (value != 1 ? 'first' : 'last' )).text(result);
+    if (result === '') result = '1';
+    if( result === ' ) ') result = 'не определено';
+    $('.thirdTask:' + id).find('.col-md-8:' + (value !== 1 ? 'first' : 'last' )).text(result);
 }
 
 function isDuality() {
     var result = '';
     $('table tr:first th').each(function (item, i) {
-        if($(item).text() != $('table tr:first th').eq(i).text())
+        if($(item).text() !== $('table tr:first th').eq(i).text())
         result = 'Нет';
     });
     var countColumn1 = $('table:first tr:first th').length;
@@ -281,28 +281,28 @@ function isDuality() {
     var tableStr = '', antyTableStr = '';
     var currentStr = 0;
     $('table:first tr:not(:first) td').each(function (i, item) {
-        if( Math.floor(i/countColumn1) != currentStr ) {
+        if( Math.floor(i/countColumn1) !== currentStr ) {
             tableStr = '';
             currentStr++;
         }
         tableStr += $(item).text();
-        if( Math.floor(i%countColumn1) == countColumn1-1 ) {
+        if( Math.floor(i%countColumn1) === countColumn1-1 ) {
             table.push(tableStr);
         }
     });
     currentStr = 0;
     $('table:last tr:not(:first) td').each(function (i, item) {
-        if( Math.floor(i/countColumn2) != currentStr ) {
+        if( Math.floor(i/countColumn2) !== currentStr ) {
             antyTableStr = '';
             currentStr++;
         }
-        antyTableStr += $(item).text() == '1' ? '0' : '1';
-        if( Math.floor(i%countColumn2) == countColumn2-1 ) {
+        antyTableStr += $(item).text() === '1' ? '0' : '1';
+        if( Math.floor(i%countColumn2) === countColumn2-1 ) {
             antyTable.push(antyTableStr);
         }
     });
-    if( result != 'Нет')
-        result = calculateDuality(table,antyTable) ? 'Да' : 'Нет';
+    if( result !== 'Нет')
+        result = calculateDuality(table, antyTable) ? 'Да' : 'Нет';
     $('.fourTask .col-md-8:first').text( result );
 }
 
