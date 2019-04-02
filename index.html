@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Логический калькулятор</title>
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="libs/bootstrap/bootstrap.min.css">
+
+    <script src="libs/jquery/jquery.min.js"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="libs/bootstrap/bootstrap.min.js"></script>
+    <script src="libs/underscore/underscore-min.js"></script>
+    <script src="validator/bootstrapValidator.min.js"></script>
+
+</head>
+<body>
+<div class="container-fluid">
+    <h1>Логический калькулятор</h1>
+        <div class="col-md-4">
+            <div class="panel panel-info">
+                <div class="panel-heading">Результат выражения</div>
+                <table class="table resultTable">
+                    <thead>
+                    <tr></tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            <div class="secondTask" style="height: 50px">
+                <div class="form-group">
+                    <label class="col-md-2">2 зад.: </label>
+                    <div class="col-md-10">
+                        <input type="text" class="form-control" disabled />
+                    </div>
+                </div>
+            </div>
+            <div class="thirdTask">
+                <div class="row">
+                    <label class="col-md-4">скнф: </label>
+                    <div class="col-md-8"> Нет данных</div>
+                </div>
+                <div class="row">
+                    <label class="col-md-4">сднф: </label>
+                    <div class="col-md-8"> Нет данных</div>
+                </div>
+            </div>
+            <div class="fourTask">
+                <div class="row">
+                    <label class="col-md-4">Двойственна: </label>
+                    <div class="col-md-8"> Нет данных</div>
+                </div>
+                <div class="row">
+                    <label class="col-md-4">Самодвойственна: </label>
+                    <div class="col-md-8"> Нет данных</div>
+                </div>
+            </div>
+            <div class="fiveTask">
+                <div class="row">
+                    <label class="col-md-4">МКНФ: </label>
+                    <div class="col-md-8"> Нет данных</div>
+                </div>
+                <div class="row">
+                    <label class="col-md-4">МДНФ: </label>
+                    <div class="col-md-8"> Нет данных</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-info">
+                <div class="panel-heading">Результат выражения</div>
+                <table class="table resultTable">
+                    <thead>
+                    <tr></tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            <div class="secondTask" style="height: 50px">
+                <div class="form-group">
+                    <label class="col-md-2">2 зад.: </label>
+                    <div class="col-md-10">
+                        <input type="text" class="form-control" disabled />
+                    </div>
+                </div>
+            </div>
+            <div class="thirdTask">
+                <div class="row">
+                    <label class="col-md-4">скнф: </label>
+                    <div class="col-md-8"> Нет данных</div>
+                </div>
+                <div class="row">
+                    <label class="col-md-4">сднф: </label>
+                    <div class="col-md-8"> Нет данных</div>
+                    </div>
+                </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-info">
+                <div class="panel-heading">Действия</div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label>Введите логическое выражение: </label>
+                        <input data-id="1" name="expression" class="form-control inputArea" placeholder="Введите логическое выражение">
+                    </div>
+                    <div class="form-group">
+                        <input data-id="2" name="expression" class="form-control inputArea" placeholder="Введите логическое выражение">
+                    </div>
+                    <button type="button" class="btn btn-success" id="calculate">Посчитать</button>
+                </div>
+            </div>
+        </div>
+</div>
+<script src="testInPolish.js"></script>
+<script src="biblio.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
