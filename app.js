@@ -16,31 +16,31 @@ var calculate = {};
 calculate.AND = function (mass, data) {
     var arg1 = mass.pop();
     var arg2 = mass.pop();
-    if( "01".indexOf(arg1) == -1 ) arg1 = data[arg1];
-    if( "01".indexOf(arg2) == -1 ) arg2 = data[arg2];
+    if( "01".indexOf(arg1) === -1 ) arg1 = data[arg1];
+    if( "01".indexOf(arg2) === -1 ) arg2 = data[arg2];
     return arg1*1 && arg2*1;
 };
 
 calculate.OR = function (mass, data) {
     var arg1 = mass.pop(),
         arg2 = mass.pop();
-    if( "01".indexOf(arg1) == -1 ) arg1 = data[arg1];
-    if( "01".indexOf(arg2) == -1 ) arg2 = data[arg2];
+    if( "01".indexOf(arg1) === -1 ) arg1 = data[arg1];
+    if( "01".indexOf(arg2) === -1 ) arg2 = data[arg2];
     return arg1*1 || arg2*1;
 };
 
 calculate.NOT = function (mass, data) {
     var arg = mass.pop();
-    arg = ( "01".indexOf(arg) == -1 ? data[arg]*1 : arg*1);
-    return ( arg == 1 ? 0 : 1);
+    arg = ( "01".indexOf(arg) === -1 ? data[arg]*1 : arg*1);
+    return ( arg === 1 ? 0 : 1);
 };
 
 calculate.IMP = function (mass, data) {
     var arg1 = mass.pop(),
         arg2 = mass.pop(),
         result;
-    if( "01".indexOf(arg1) == -1 ) arg1 = data[arg1];
-    if( "01".indexOf(arg2) == -1 ) arg2 = data[arg2];
+    if( "01".indexOf(arg1) === -1 ) arg1 = data[arg1];
+    if( "01".indexOf(arg2) === -1 ) arg2 = data[arg2];
     if(arg1 == '0' && arg2 == '0') result = 1;
     if(arg1 == '1' && arg2 == '0') result = 1;
     if(arg1 == '0' && arg2 == '1') result = 0;
@@ -51,8 +51,8 @@ calculate.IMP = function (mass, data) {
 calculate.EQ = function (mass, data) {
     var arg1 = mass.pop(),
         arg2 = mass.pop();
-    arg1 = ( "01".indexOf(arg1) == -1 ? data[arg1]*1 : arg1*1);
-    arg2 = ( "01".indexOf(arg2) == -1 ? data[arg2]*1 : arg2*1);
+    arg1 = ( "01".indexOf(arg1) === -1 ? data[arg1]*1 : arg1*1);
+    arg2 = ( "01".indexOf(arg2) === -1 ? data[arg2]*1 : arg2*1);
     return (arg1 == arg2)*1;
 };
 
@@ -79,28 +79,28 @@ var calculation = function (polish, data) {
 };
 
 var createTable = function(polish, id) {
-    var value = [];
-    $('.resultTable:' + id).find('thead tr').html('');
-    $('.resultTable:' + id).find('tbody').html('');
+    let value = [], table = $('.resultTable:' + String(id));
+    table.find('thead tr').html('');
+    table.find('tbody').html('');
     vars.forEach(function(item) {
         $('.resultTable:' + id).find('thead tr').append('<th>'+item+'</th>');
         value.push(0);
     });
-    $('.resultTable:' + id).find('thead tr').append('<th>Результат</th>');
-    var count = Math.pow(2, vars.length);
-    for( var i = 0; i < count; i++ ) {
-        var values = i.toString(2),
+    table.find('thead tr').append('<th>Результат</th>');
+    let count = Math.pow(2, vars.length);
+    for( let i = 0; i < count; i++ ) {
+        let values = i.toString(2),
             minus = vars.length - values.length,
             tr = '<tr>';
-        for( var j = 0; j < minus; j++ ) {
+        for( let j = 0; j < minus; j++ ) {
             values = '0' + values;
         }
         vars.forEach(function (item, i) {
             tr += '<td>'+values.charAt(i)+'</td>'
         });
-        var mapVars = _.object(vars, values);
-        var result = calculation(polish, mapVars );
-        if ( "01".indexOf(result) == -1 ) result = mapVars[result];
+        let mapVars = _.object(vars, values);
+        let result = calculation(polish, mapVars );
+        if ( "01".indexOf(result) === -1 ) result = mapVars[result];
         tr += '<td>'+result+'</td>';
         $('.resultTable:' + id).find('tbody').append(tr+'</tr>');
     }
@@ -140,34 +140,16 @@ $(document).ready(function() {
     });
 
     /* ---------------------------------- второе задание ---------------------*/
-    $(document).on('click', '#secondTaskBtn', function () {
-        var result = - 1;
-        if( $('td').length == 0 )
-            alert("Нет таблицы истенности");
-        else {
-
-        }
-    });
 
     $('#calculate').click(function() {
         if($('[name="expression"]:first').val() != '') {
             resultOfExpression('first');
-            selfDuality();
-        }
-        if($('[name="expression"]:last').val() != '') {
-            resultOfExpression('last');
-            isDuality();
         }
     });
 
     $('[name="expression"]').keydown(function (e) {
-        if(e.keyCode == 13 ) {
-            var id = $(e.target).data('id') == '1' ? 'first' : 'last';
-            resultOfExpression(id);
-            if( id == 'first' )
-                selfDuality();
-            else
-                isDuality();
+        if(e.keyCode === 13 ) {
+            resultOfExpression('first');
         }
     })
 });
@@ -222,14 +204,13 @@ function resultOfExpression(id) {
     }
     vars.sort();
     createTable(polish, id);
-    calculateSecondTask(id);
+    calculateCharacteristics(id);
 }
 
-function calculateSecondTask(id) {
-    var results = [0, 0];
-    var columnZero = [];
-    var columnOne = [];
-    $('table:'+id+' tr:not(:first)').each(function (i, item) {
+function calculateCharacteristics(id) {
+    let results = [0, 0];
+    let columnZero = [], columnOne = [];
+    $('table:' + id + ' tr:not(:first)').each(function (i, item) {
         var value = $(item).find('td:last').text()*1;
         results[value]++;
         if( value === 0 ) columnZero.push(i);
@@ -239,11 +220,6 @@ function calculateSecondTask(id) {
     calculateSKNFandSDNF(id, columnOne, 1);
     minimizationSDNF();
     minimizationSKNF();
-    var result = 'Функция выполнима и опровержима.';
-    if( columnZero.length === 0 ) result = 'Функция тождественно истинна.';
-    if( columnOne.length === 0 ) result = 'Функция тождественно ложна.';
-
-    $('.secondTask input:' + id).val(result);
 }
 
 // ищем значения в таблице с нулями
@@ -252,12 +228,13 @@ function calculateSecondTask(id) {
 сдтф - совершенно дизьюнктивная нормальная форма
 * */
 function calculateSKNFandSDNF(id, columnZero, value) {
-    var result = '';
+    console.log(id, columnZero, value);
+    let result = '';
     columnZero.forEach(function (i) {
         result += ' (';
         $('table:' + id + ' tr').eq(i+1).find('td:not(:last)').each(function (j, item) {
-            var val = $(item).text()*1;
-            var sign = value === 0 ? '|' : '&';
+            let val = $(item).text()*1;
+            let sign = value === 0 ? '|' : '&';
             result += val !== value ? (' !' + vars[j] + ' ' + sign) : (' ' + vars[j] + ' ' + sign);
         });
         result = result.substr(0, result.length - 1);
@@ -266,83 +243,8 @@ function calculateSKNFandSDNF(id, columnZero, value) {
     result = result.substr(0, result.length - 1);
     if (result === '') result = '1';
     if( result === ' ) ') result = 'не определено';
-    $('.thirdTask:' + id).find('.col-md-8:' + (value !== 1 ? 'first' : 'last' )).text(result);
+    $(value !== 1 ? '.sknf' : '.sdnf').text(result);
 }
-
-function isDuality() {
-    var result = '';
-    $('table tr:first th').each(function (item, i) {
-        if($(item).text() !== $('table tr:first th').eq(i).text())
-        result = 'Нет';
-    });
-    var countColumn1 = $('table:first tr:first th').length;
-    var countColumn2 = $('table:last tr:first th').length;
-    var table = [], antyTable = [];
-    var tableStr = '', antyTableStr = '';
-    var currentStr = 0;
-    $('table:first tr:not(:first) td').each(function (i, item) {
-        if( Math.floor(i/countColumn1) !== currentStr ) {
-            tableStr = '';
-            currentStr++;
-        }
-        tableStr += $(item).text();
-        if( Math.floor(i%countColumn1) === countColumn1-1 ) {
-            table.push(tableStr);
-        }
-    });
-    currentStr = 0;
-    $('table:last tr:not(:first) td').each(function (i, item) {
-        if( Math.floor(i/countColumn2) !== currentStr ) {
-            antyTableStr = '';
-            currentStr++;
-        }
-        antyTableStr += $(item).text() === '1' ? '0' : '1';
-        if( Math.floor(i%countColumn2) === countColumn2-1 ) {
-            antyTable.push(antyTableStr);
-        }
-    });
-    if( result !== 'Нет')
-        result = calculateDuality(table, antyTable) ? 'Да' : 'Нет';
-    $('.fourTask .col-md-8:first').text( result );
-}
-
-function selfDuality() {
-    var countColumn = vars.length + 1;
-    var table = [], antyTable = [];
-    var tableStr = '', antyTableStr = '';
-    var currentStr = 0;
-    $('table:first tr:not(:first) td').each(function (i, item) {
-        if( Math.floor(i/countColumn) != currentStr ) {
-            tableStr = '';
-            antyTableStr = '';
-            currentStr++;
-        }
-        tableStr        += $(item).text();
-        antyTableStr    += $(item).text() == '0' ? '1' : '0';
-        if( Math.floor(i%countColumn) == countColumn-1 ) {
-            table.push(tableStr);
-            antyTable.push(antyTableStr);
-        }
-    });
-    $('.fourTask .col-md-8:last').text( calculateDuality(table,antyTable) ? 'Да' : 'Нет' );
-}
-
-var calculateDuality = function (table, antyTable) {
-    var indexes = [];
-    var isOk,
-        result = true;
-    table.forEach(function (item, i) {
-        isOk = false;
-        antyTable.forEach(function (item2, j) {
-            if( item == item2 && indexes.indexOf(j) == -1) {
-                indexes.push(j);
-                isOk = true;
-            }
-        });
-        if( !isOk ) result = false;
-    });
-    return result
-};
 
 function minimizationSKNF() {
     var curVal = $('.thirdTask .col-md-8:first').text();
@@ -374,7 +276,7 @@ function minimizationSKNF() {
             }
         });
     });
-    $('.fiveTask .col-md-8:first').text(result.substr(0, result.length - 1));
+    $('.mknf').text(result.substr(0, result.length - 1));
 }
 
 function minimizationSDNF() {
@@ -408,7 +310,7 @@ function minimizationSDNF() {
             }
         });
     });
-    $('.fiveTask .col-md-8:last').text(result.substr(0, result.length - 1));
+    $('.mdnf').text(result.substr(0, result.length - 1));
 }
 
 var calculateZeroOrOne = function (val) {

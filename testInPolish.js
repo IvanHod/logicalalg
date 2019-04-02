@@ -3,16 +3,16 @@ var translate = function (str) {
     var stack = {
         value : [],
         top : function() {return this.value[this.value.length - 1]},
-        isEmpty: function() {return ( this.value.length == 0 ? true : false )}
+        isEmpty: function() {return ( this.value.length === 0 )}
     }, polish = [];
 
     str.forEach(function(item) {
         item = operation(item);
-        if( item == 'LEFT' ) {
+        if( item === 'LEFT' ) {
             stack.value.push(item);
         } else if( item == 'NOT' ) {
             stack.value.push(item);
-        } else if( item == 'AND' || item == 'OR' || item == 'EQ' || item == 'IMP' || item == ')' ) {
+        } else if( item === 'AND' || item === 'OR' || item === 'EQ' || item === 'IMP' || item === ')' ) {
             if( !stack.isEmpty() ) {
                 var top = stack.top(),
                     action = table[item][top];
@@ -32,10 +32,10 @@ var translate = function (str) {
             polish.push({value: item, isOperation: false});
         }
     });
-    for( var i = 0; !stack.isEmpty(); i++) {
+    for( let i = 0; !stack.isEmpty(); i++) {
         polish.push({value: stack.value.pop(), isOperation: true});
     }
-    var result = '';
+    let result = '';
     polish.forEach(function(item, i) {
         result += item.value + ' ';
     });
