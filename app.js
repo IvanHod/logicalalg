@@ -269,11 +269,13 @@ function calculateSKNFandSDNF(id, columnZero, value) {
     $(value !== 1 ? '.sknf' : '.sdnf').text(result);
 }
 
+// Минимальная конъюнктивная нормальная форма (http://cyclowiki.org/wiki/Минимальная_конъюнктивная_нормальная_форма)
 function minimizationSKNF() {
-    var strs = calculateZeroOrOne('0'),
+    var strs = calculateZeroOrOne('0'), // Поиск строк, где результат равен 0
         array = [strs],
         isChange = [1];
     while (isChange.length) {
+        // посчитать массивы с разным одним значениям и объединить одинаковые массивы
         isChange = _.union(oneDifferent(array[array.length - 1]));
         if(isChange.length) {
             array[array.length] = isChange;
@@ -282,9 +284,11 @@ function minimizationSKNF() {
     array = deleteExtraEl(array);
 
     // Объеденить все в один массив
-    var core = _.union(findCore(array, calculateZeroOrOne('0')));
+    let core = _.union(findCore(array, calculateZeroOrOne('0')));
     core = cutCore(calculateZeroOrOne('0'), core, array);
-    var result = '';
+    let result = '';
+
+    // Сформировать МКНФ по нулям, вырезав x
     core.forEach(function (item, i) {
         item.split('').forEach(function(sim, s) {
             if( s === 0 ) result += '(';
@@ -299,26 +303,32 @@ function minimizationSKNF() {
     $('.mknf').text(result.substr(0, result.length - 1));
 }
 
+// http://cyclowiki.org/wiki/Минимальная_дизъюнктивная_нормальная_форма
 function minimizationSDNF() {
-    var strs = calculateZeroOrOne('1'),
+    var strs = calculateZeroOrOne('1'), // Поиск строк, где результат равен 1
         array = [strs],
         isChange = [1];
-    while (isChange.length != 0) {
+    while (isChange.length !== 0) {
+        // посчитать массивы с разным одним значениям и объединить одинаковые массивы
         isChange = _.union(oneDifferent(array[array.length - 1]));
-        if(isChange.length != 0) {
+        if(isChange.length !== 0) {
             array[array.length] = isChange;
         }
     }
+    console.log(array);
     array = deleteExtraEl(array);
-    var core = _.union(findCore(array,calculateZeroOrOne('1')));
+    console.log(array);
+    let core = _.union(findCore(array,calculateZeroOrOne('1')));
+    console.log(core);
     core = cutCore(calculateZeroOrOne('1'), core, array);
-    var result = '';
+    console.log(core);
+    let result = '';
     core.forEach(function (item) {
         item.split('').forEach(function(sim, s) {
             if( s == 0 ) result += '(';
-            if( sim != 'x' )
+            if( sim !== 'x' )
                 result += (sim == '1' ? '' : '!') + vars[s] + '&';
-            if( s == item.length - 1) {
+            if( s === item.length - 1) {
                 result = result.substr(0, result.length - 1);
                 result += ')|';
             }
@@ -327,11 +337,15 @@ function minimizationSDNF() {
     $('.mdnf').text(result.substr(0, result.length - 1));
 }
 
+// найти строки содержащие переданный результат (0 или 1)
 let calculateZeroOrOne = function (val) {
     let strs = [];
+
+    // Для всех строк таблицы истинности кроме строки с заголовком
     $('table:first tr:not(:first)').each(function (i, tr) {
+        // если результат равняется переданному значению, т.е. 0 или 1
         if($(tr).find('>td:last').text() == val) {
-            var tds = '';
+            var tds = ''; // Записать строку
             $(tr).find('>td:not(:last)').each(function (j, td) {
                 tds += $(td).text();
             });
@@ -341,16 +355,17 @@ let calculateZeroOrOne = function (val) {
     return strs;
 };
 
+// Удалить лишние массивы (без x значений и одинаковые
 let deleteExtraEl = function (array) {
-    // цикл для топ
-    for(var i = array.length - 2; i >= 0; i--) {
-        // для удаляемого
-        for(var j = array.length - 1; j > i; j--) {
-            for(var k = 0; k < array[i].length; k++) {
-                var eq = true;
+    // цикл для верхнего массива
+    for(let i = array.length - 2; i >= 0; i--) {
+        // цикл для удаляемого массива
+        for(let j = array.length - 1; j > i; j--) {
+            for(let k = 0; k < array[i].length; k++) {
+                let eq = true;
                 array[j].forEach(function (lastStr, l) {
                     lastStr.split('').forEach(function (simbol, s) {
-                        if (simbol != 'x' && array[i][l] != undefined && simbol != array[i][l][s])
+                        if (simbol !== 'x' && array[i][l] != undefined && simbol != array[i][l][s])
                             eq = false;
                     });
                     if(eq && array[i].length != 0) {
@@ -361,20 +376,27 @@ let deleteExtraEl = function (array) {
             }
         }
     }
-    return _.flatten(array);
+    return _.flatten(array); // Объеденить многоменрный массив в одномерный массив
 };
 
-var oneDifferent = function(array) {
-    var result = [],
+//
+let oneDifferent = function(array) {
+    let result = [],
         localResult = '';
+    // Для всех массивов
     array.forEach(function (exp, i) {
-        var rest = _.rest(array, i+1);
+        let rest = _.rest(array, i + 1); // Вернуть последнующие массивы после текущего
         rest.forEach(function (oneExp, j) {
-            var countDifferents = 0;
+            let countDifferents = 0;
+
+            // Для каждого элемента посчитать количество отличий
             oneExp.split('').forEach(function (simbol, k) {
                 if( simbol != exp[k] ) countDifferents++;
             });
-            if( countDifferents == 1 ) {
+
+            // если колличество отличий равно 1
+            if( countDifferents === 1 ) {
+                // заменить отличающиеся значение на x
                 oneExp.split('').forEach(function (simbol, k) {
                     if( simbol == exp[k] ) localResult += simbol;
                     else localResult += 'x';
@@ -384,7 +406,8 @@ var oneDifferent = function(array) {
             }
         });
     });
-    if( result.length != 0 )
+    // если есть результат, вернуть его
+    if(result.length)
         return result;
 };
 
@@ -416,7 +439,7 @@ var cutCore = function(all, core, array) {
     });
     if( all.length > 0 ) {
         var cutIsEmpty = false;
-        while( all.length != 0 ) {
+        while( all.length !== 0 ) {
             var cut = _.difference(array, core);
             // для каждого посчитать.
             var counts = [];
