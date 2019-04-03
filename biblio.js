@@ -1,3 +1,4 @@
+// Матрица приоритетов
 var table = {
     AND : {
         NOT : 4,
@@ -33,6 +34,7 @@ var table = {
     }
 };
 
+// Словесное обозначение операций
 var operation = function(operation) {
     switch (operation) {
         case '!' : operation = 'NOT'; break;

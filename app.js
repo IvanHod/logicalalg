@@ -56,38 +56,50 @@ calculate.EQ = function (mass, data) {
     return (arg1 == arg2)*1;
 };
 
-var setRightVid = function (str) {
-    str = str.replace(/\&/g,' & ').replace(/\|/g, ' | ').replace(/\!/g, ' ! ')
-        .replace(/\)/g,' ) ').replace(/<->/g, ' <-> ').replace(/\(/g,' ( ');
+// Преобразовать в корректный вид (добавить один пробел между каждым символом)
+let setRightVid = function (str) {
+    str = str.replace(/\&/g,' & ')
+        .replace(/\|/g, ' | ')
+        .replace(/\!/g, ' ! ')
+        .replace(/\)/g,' ) ')
+        .replace(/<->/g, ' <-> ')
+        .replace(/\(/g,' ( ');
     str = str.replace(/[^<]->/g, function (item) {
         return item[0] + ' -> ';
     });
     return str.replace(/\s{2,}/g,' ');
 };
 
-var calculation = function (polish, data) {
-    var stack = [];
+let calculation = function (polish, data) {
+    let stack = [];
     polish.forEach(function (item, i) {
         if( !item.isOperation ) {
+            // Если не операция, добавить в стэк
             stack.push(item.value);
         } else {
-            var res = calculate[item.value](stack, data);
+            // Иначе вычислить и поместить результат в стэк
+            let res = calculate[item.value](stack, data);
             stack.push( res );
         }
     });
     return stack[0];
 };
 
-var createTable = function(polish, id) {
+let createTable = function(polish, id) {
     let value = [], table = $('.resultTable:' + String(id));
     table.find('thead tr').html('');
     table.find('tbody').html('');
+
+    // Добавить переменные
     vars.forEach(function(item) {
         $('.resultTable:' + id).find('thead tr').append('<th>'+item+'</th>');
         value.push(0);
     });
     table.find('thead tr').append('<th>Результат</th>');
+
+    // Количество строк
     let count = Math.pow(2, vars.length);
+
     for( let i = 0; i < count; i++ ) {
         let values = i.toString(2),
             minus = vars.length - values.length,
@@ -98,28 +110,33 @@ var createTable = function(polish, id) {
         vars.forEach(function (item, i) {
             tr += '<td>'+values.charAt(i)+'</td>'
         });
+
+        // Создать объект переменные -> значения
         let mapVars = _.object(vars, values);
-        let result = calculation(polish, mapVars );
-        if ( "01".indexOf(result) === -1 ) result = mapVars[result];
-        tr += '<td>'+result+'</td>';
-        $('.resultTable:' + id).find('tbody').append(tr+'</tr>');
+        let result = calculation(polish, mapVars ); // Вычислить результат
+        if ( "01".indexOf(result) === -1 ) {
+            result = mapVars[result];
+        }
+        tr += '<td>' + result + '</td>';
+        $('.resultTable:' + id).find('tbody').append(tr + '</tr>');
     }
 };
 
 $(document).ready(function() {
 
+    // Обработка ввода новых символов в строку ввода
     $(document).on('input', '.inputArea', function (e) {
-        var str = $(e.currentTarget).val(),
-            array = str.split(/[\!\|\&\(\)]|<->|->/g),
+        let str = $(e.currentTarget).val(),
             isValid = true,
             countBracket = 0;
-        // проверка на символы
+
+        // проверка на одинаковое колличество пробелов и на неразрешенные символы
         str.split('').forEach(function (item, i) {
-            if( item == '(' ) countBracket++;
-            if( item == ')' ) countBracket--;
+            if( item === '(' ) countBracket++;
+            if( item === ')' ) countBracket--;
             if( /[a-zA-Z0-9\&\|\!<\->\(\)\s]/.exec(item) === null ) isValid = false;
         });
-        if ( countBracket != 0 )                                    isValid = false;
+        if ( countBracket !== 0 )                                   isValid = false;
         str = str.replace(/\s/g,'');
         if( /[a-zA-Z0-9\-<]\(/.exec(str) !== null )                 isValid = false;
         if( /\)[a-zA-Z0-9>\!]/.exec(str) !== null )                 isValid = false;
@@ -142,7 +159,8 @@ $(document).ready(function() {
     /* ---------------------------------- второе задание ---------------------*/
 
     $('#calculate').click(function() {
-        if($('[name="expression"]:first').val() != '') {
+        let input = $('[name="expression"]:first');
+        if(input.val() && !input.parent().hasClass('has-error')) {
             resultOfExpression('first');
         }
     });
@@ -155,40 +173,41 @@ $(document).ready(function() {
 });
 
 function resultOfExpression(id) {
-    var str = _.compact(setRightVid( $('[name="expression"]:'+id).val()).split(' ')),
+    var str = _.compact(setRightVid( $('[name="expression"]:'+id).val()).split(' ')), // обработанное входное выражение
         stack = {
             value : [],
-            top : function() {return this.value[this.value.length - 1]},
+            top : function() {return this.value[this.value.length - 1]}, // получить верхний элемент
             isEmpty: function() {return ( this.value.length === 0 )}
         },
-        polish = [];
+        polish = []; // Массив для хранения выражения в польской нотации (префиксная запись)
     vars = [];
 
     str.forEach(function(item) {
+        // добавить символ в массив с переменными, если это не операция и не 0 или 1
         if( "!&|-><->()".indexOf(item) === -1 && vars.indexOf(item) === -1 && "01".indexOf(item) === -1 ) {
             vars.push(item);
         }
-        item = operation(item);
+        item = operation(item); // Получить код рассматриваемой операции
         if( item === 'LEFT' ) {
             stack.value.push(item);
         } else if( item === 'NOT' ) {
             stack.value.push(item);
         } else if ( item === 'RIGHT') {
+            // Пока не найденна левая скобка, дополнять польскую нотацию
             while ( stack.top() !== 'LEFT' ) {
                 polish.push({value: stack.value.pop(), isOperation: true});
             }
             stack.value.pop();
         } else if( item === 'AND' || item === 'OR' || item === 'EQ' || item === 'IMP') {
-            var isOk = true;
-            var addToStack = false;
+            let isOk = true;
             while (isOk ) {
                 if( !stack.isEmpty() ) {
-                    var top = stack.top();
-                    var action = table[item][top];
-                    if( action === 1 || action === 2 ) isOk = false;
+                    let top = stack.top();
+                    let action = table[item][top]; // получить приоритет оператора
+                    if( action === 1 || action === 2 )
+                        isOk = false;
                     if( action === 2 || action === 4 ) {
                         polish.push({value: stack.value.pop(), isOperation: true});
-                        addToStack = true;
                     }
                 } else {
                     isOk = false;
@@ -196,49 +215,53 @@ function resultOfExpression(id) {
             }
             stack.value.push(item);
         } else {
-            polish.push({value: item, isOperation: false});
+            polish.push({value: item, isOperation: false}); // Добавить как операнд
         }
     });
-    for( var i = 0; !stack.isEmpty(); i++) {
+
+    // переместить все оставшиеся переменные из стэка в Польскую нотацию
+    for( let i = 0; !stack.isEmpty(); i++) {
         polish.push({value: stack.value.pop(), isOperation: true});
     }
     vars.sort();
-    createTable(polish, id);
+    createTable(polish, id); // Создать таблицу истинности
     calculateCharacteristics(id);
 }
 
 function calculateCharacteristics(id) {
     let results = [0, 0];
+    // индексы колонок, где результат == 0 и результат == 1 соответсвенно
     let columnZero = [], columnOne = [];
     $('table:' + id + ' tr:not(:first)').each(function (i, item) {
-        var value = $(item).find('td:last').text()*1;
+        var value = $(item).find('td:last').text() * 1;
         results[value]++;
         if( value === 0 ) columnZero.push(i);
         if( value === 1 ) columnOne.push(i);
     });
-    calculateSKNFandSDNF(id, columnZero, 0);
-    calculateSKNFandSDNF(id, columnOne, 1);
-    minimizationSDNF();
-    minimizationSKNF();
+    calculateSKNFandSDNF(id, columnZero, 0); // Рассчет СКНФ
+    calculateSKNFandSDNF(id, columnOne, 1); // Рассчет СДНФ
+    minimizationSDNF(); // Рассчет МКНФ
+    minimizationSKNF(); // Рассчет МДНФ
 }
 
 // ищем значения в таблице с нулями
 /*
-сктф - совершенная коньюктивная нормальная форма
-сдтф - совершенно дизьюнктивная нормальная форма
+скнф - совершенная коньюктивная нормальная форма
+сднф - совершенно дизьюнктивная нормальная форма
 * */
 function calculateSKNFandSDNF(id, columnZero, value) {
-    console.log(id, columnZero, value);
     let result = '';
     columnZero.forEach(function (i) {
         result += ' (';
-        $('table:' + id + ' tr').eq(i+1).find('td:not(:last)').each(function (j, item) {
-            let val = $(item).text()*1;
-            let sign = value === 0 ? '|' : '&';
+        $('table:' + id + ' tr').eq(i + 1).find('td:not(:last)').each(function (j, item) {
+            let val = $(item).text()*1; // Получить значение по строке/столбцу
+            let sign = value === 0 ? '|' : '&'; // Определить коньюнкция это или дезъюнкция
+
+            // Добавить в строку
             result += val !== value ? (' !' + vars[j] + ' ' + sign) : (' ' + vars[j] + ' ' + sign);
         });
         result = result.substr(0, result.length - 1);
-        result += (') '  + (value === 0 ? '&' : '|') );
+        result += (') '  + (value === 0 ? '&' : '|') ); // Объединить строки знаком
     });
     result = result.substr(0, result.length - 1);
     if (result === '') result = '1';
@@ -247,30 +270,27 @@ function calculateSKNFandSDNF(id, columnZero, value) {
 }
 
 function minimizationSKNF() {
-    var curVal = $('.thirdTask .col-md-8:first').text();
-    if( curVal == '0' || curVal == '1' || curVal == 'не определено') {
-        $('.fiveTask .col-md-8:first').text(curVal);
-        return;
-    }
     var strs = calculateZeroOrOne('0'),
         array = [strs],
         isChange = [1];
-    while (isChange.length != 0) {
+    while (isChange.length) {
         isChange = _.union(oneDifferent(array[array.length - 1]));
-        if(isChange.length != 0) {
+        if(isChange.length) {
             array[array.length] = isChange;
         }
     }
     array = deleteExtraEl(array);
-    var core = _.union(findCore(array,calculateZeroOrOne('0')));
+
+    // Объеденить все в один массив
+    var core = _.union(findCore(array, calculateZeroOrOne('0')));
     core = cutCore(calculateZeroOrOne('0'), core, array);
     var result = '';
     core.forEach(function (item, i) {
         item.split('').forEach(function(sim, s) {
-            if( s == 0 ) result += '(';
-            if( sim != 'x' )
+            if( s === 0 ) result += '(';
+            if( sim !== 'x' )
                 result += (sim == '0' ? '' : '!') + vars[s] + '|';
-            if( s == item.length - 1) {
+            if( s === item.length - 1) {
                 result = result.substr(0, result.length - 1);
                 result += ')&';
             }
@@ -280,12 +300,6 @@ function minimizationSKNF() {
 }
 
 function minimizationSDNF() {
-    var curVal = $('.thirdTask .col-md-8:last').text();
-    console.log('five', curVal)
-    if( curVal == '0' || curVal == '1' || curVal == 'не определено' || curVal == 'Нет данных' ) {
-        $('.fiveTask .col-md-8:last').text(curVal);
-        return;
-    }
     var strs = calculateZeroOrOne('1'),
         array = [strs],
         isChange = [1];
@@ -313,8 +327,8 @@ function minimizationSDNF() {
     $('.mdnf').text(result.substr(0, result.length - 1));
 }
 
-var calculateZeroOrOne = function (val) {
-    var strs = [];
+let calculateZeroOrOne = function (val) {
+    let strs = [];
     $('table:first tr:not(:first)').each(function (i, tr) {
         if($(tr).find('>td:last').text() == val) {
             var tds = '';
@@ -327,7 +341,7 @@ var calculateZeroOrOne = function (val) {
     return strs;
 };
 
-var deleteExtraEl = function (array) {
+let deleteExtraEl = function (array) {
     // цикл для топ
     for(var i = array.length - 2; i >= 0; i--) {
         // для удаляемого
