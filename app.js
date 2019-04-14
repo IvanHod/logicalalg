@@ -56,6 +56,17 @@ calculate.EQ = function (mass, data) {
     return (arg1 == arg2)*1;
 };
 
+var getLogisticSign = function(sign) {
+    let operations = {
+        '&': '&and;',
+        '|': '&or;',
+        '!': '&not;',
+        '->': '&rArr;',
+        '<->': '&hArr;'
+    };
+    return operations[sign] ? operations[sign] : sign;
+};
+
 // Преобразовать в корректный вид (добавить один пробел между каждым символом)
 let setRightVid = function (str) {
     str = str.replace(/\&/g,' & ')
@@ -225,7 +236,20 @@ function resultOfExpression(id) {
     }
     vars.sort();
     createTable(polish, id); // Создать таблицу истинности
+    buildLogicFunction(str, vars);
     calculateCharacteristics(id);
+}
+
+function buildLogicFunction(str, vars) {
+    let res = [];
+    for (let i = 0; i < str.length; i++) {
+        if (str[i] in vars) {
+            res.push(str[i])
+        } else {
+            res.push(getLogisticSign(str[i]))
+        }
+    }
+    $('.logic-expr').html(res.join(' '));
 }
 
 function calculateCharacteristics(id) {
@@ -315,13 +339,9 @@ function minimizationSDNF() {
             array[array.length] = isChange;
         }
     }
-    console.log(array);
     array = deleteExtraEl(array);
-    console.log(array);
     let core = _.union(findCore(array,calculateZeroOrOne('1')));
-    console.log(core);
     core = cutCore(calculateZeroOrOne('1'), core, array);
-    console.log(core);
     let result = '';
     core.forEach(function (item) {
         item.split('').forEach(function(sim, s) {
